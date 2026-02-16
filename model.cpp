@@ -96,7 +96,9 @@ struct AlexNetModel : torch::nn::Module
     x = conv4(x);
     x = conv5(x);
 
-    const int64_t flat_dim = x.size(1);
+    flattened_x = torch::flatten(x);
+
+    const int64_t flat_dim = flattened_x.size(1);
     fc1 = register_module("fc1", torch::nn::Linear(flat_dim, model_params.stride));
 
     x = fc1(x);
