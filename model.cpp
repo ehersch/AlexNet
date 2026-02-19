@@ -125,7 +125,7 @@ train(
 
     model.train(); // first model in train mode
 
-    for (int epoch = 0; epoch < epochs; epoch++)
+    for (int epoch = 0; epoch < epochs; ++epoch)
     {
         for (auto const &batch : *data)
         {
@@ -150,9 +150,28 @@ train(
 
         cur_losses.clear();
     }
-    return losses
+    return losses;
 }
 
-void evaluate()
+double evaluate(torch::nn::Module &model, torch::data::DataLoader &data)
 {
+    int64_t correct = 0;
+    int64_t total = 0;
+    model.eval();
+    torch::NoGradGuard no_grad;
+
+    for (auto &batch : *data)
+    {
+        auto x = batch.data;
+        auto y = batch.target;
+        auto preds = model.forward(x);
+
+        auto predicted = preds.argmax(1);
+
+        correct += predicted.eq(y).sum().item<int64_t>();
+        total += y.size(0);
+    }
+
+    double accuracy = correct / total;
+    return accuracy;
 }
